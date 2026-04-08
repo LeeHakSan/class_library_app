@@ -17,6 +17,32 @@ public class BorrowDAO {
     // 이게 트랜잭션 처리할 때는 값을 확인해서 commit 또는 rollback 해야 하기 때문에 사용하면 안됨
     // 즉, 직접 close() 처리 해야 함 - 트랜잭션 처리를 위해서.
 
+
+
+    public boolean checkBorrowBook (int bookId) throws SQLException {
+
+        Connection conn = DatabaseUtil.getConnection();
+
+        String checkSql = """
+                    SELECT available FROM books WHERE id = ?
+                    """;
+        try (PreparedStatement checkPstmt = conn.prepareStatement(checkSql)) {
+            checkPstmt.setInt(1, bookId);
+            try (ResultSet rs = checkPstmt.executeQuery()) {
+                if (rs.next() == false) {
+                    return false;
+                }
+                if (rs.getBoolean("available") == false) {
+                    return false;
+                }
+                return true;
+            }
+
+
+        } // end of checkPstmt
+
+    }
+
     /**
      *
      * @param bookId

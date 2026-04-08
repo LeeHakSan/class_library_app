@@ -1,10 +1,12 @@
 package com.tenco.library.view;
 
 import com.tenco.library.dto.Book;
+import com.tenco.library.dto.Borrow;
 import com.tenco.library.dto.Student;
 import com.tenco.library.service.LibraryService;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -106,23 +108,83 @@ public class LibraryView {
     }
 
     // 8
-    private void returnBook() {
+    private void returnBook() throws SQLException {
+        int bookId = readInt("책 ID 를 입력하세요 : ");
+        int studentId = readInt("학생 ID 를 입력하세요 : ");
+
+        service.returnBook(bookId, studentId);
+        System.out.println("도서 반납이 되었습니다.");
+
     }
 
     // 7
-    private void listBorrowedBooks() {
+    private void listBorrowedBooks() throws SQLException {
+        System.out.println("===== 현재 대출중인 책 조회 =====");
+        List<Borrow> borrowList = service.getBorrowedBooks();
+
+        if (borrowList.isEmpty()) {
+            System.out.println("대출중인 책 목록이 없습니다.");
+        } else {
+            for  (Borrow b : borrowList) {
+                System.out.printf("대출 번호 : %d | 책 번호 : %d | 학생 번호 : %d | 빌린 날짜 : %s\n",
+                        b.getId(),
+                        b.getBookId(),
+                        b.getStudentId(),
+                        b.getBorrowDate());
+            }
+        }
     }
 
     // 6
-    private void borrowBooks() {
+    private void borrowBooks() throws SQLException {
+        if (currentStudentId != null) {
+            int bookId = readInt("책 번호를 입력 하세요 : ");
+            int studentId = readInt("학생 번호를 입력하세요 : ");
+
+            if (service.checkBorrowBook(bookId)) {
+                System.out.println("도서 대출이 완료 됐습니다.");
+                service.borrowBook(bookId, studentId);
+            } else {
+                System.out.println("이미 대출중인 도서 입니다.");
+            }
+        } else {
+            System.out.println("로그인이 필요합니다.");
+        }
+
+
     }
 
     // 5
-    private void listStudents() {
+    private void listStudents() throws SQLException {
+        List<Student> studentList = service.getAllStudents();
+
+        for (Student s : studentList) {
+            System.out.printf("이름 : %5s | 학번 : %-8s\n", s.getName(), s.getStudentId());
+        }
     }
 
     // 4
-    private void addStudent() {
+    private void addStudent() throws SQLException {
+
+        System.out.print("학생의 이름을 입력하세요 : ");
+        String studentName = scanner.nextLine().trim();
+        if (studentName.isEmpty()) {
+            System.out.println("이름은 공백일 수 없습니다.");
+            return;
+        }
+
+        System.out.print("학번을 입력하세요 : ");
+        String studentId = scanner.nextLine().trim();
+        if (studentId.isEmpty()) {
+            System.out.println("학번은 공백일 수 없습니다");
+            return;
+        }
+
+        Student student = new Student(studentId, studentName);
+        service.addStudent(student);
+
+        System.out.println(studentName + " 학생이 정상 등록 되었습니다");
+
     }
 
     // 3.
@@ -233,7 +295,7 @@ public class LibraryView {
     // 숫자 입력을 안전하게 처리(잘못된 입력 시 재 요청)
     private int readInt(String prompt) {
         while (true) {
-            System.out.println(prompt);
+            System.out.print(prompt);
             try {
                 return Integer.parseInt(scanner.nextLine().trim());
             } catch (NumberFormatException e) {

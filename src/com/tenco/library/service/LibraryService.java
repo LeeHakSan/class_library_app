@@ -4,6 +4,7 @@ import com.tenco.library.dao.BookDAO;
 import com.tenco.library.dao.BorrowDAO;
 import com.tenco.library.dao.StudentDAO;
 import com.tenco.library.dto.Book;
+import com.tenco.library.dto.Borrow;
 import com.tenco.library.dto.Student;
 
 import java.sql.SQLException;
@@ -24,7 +25,7 @@ public class LibraryService {
             throw new SQLException("도서 제목 입력은 필수 항목 입니다.");
         }
         if (book.getAuthor() == null || book.getAuthor().trim().isEmpty()) {
-            throw new SQLException("조서 저자는 필수 입력 항목 입니다.");
+            throw new SQLException("도서 저자는 필수 입력 항목 입니다.");
         }
         bookDAO.addBook(book);
     }
@@ -101,6 +102,15 @@ public class LibraryService {
         }
         borrowDAO.returnBook(bookId, studentId);
     }
+
+    public List<Borrow> getBorrowedBooks() throws SQLException {
+        return borrowDAO.getBorrowedBooks();
+    }
+
+    public boolean checkBorrowBook(int bookId) throws SQLException {
+        return borrowDAO.checkBorrowBook(bookId);
+    }
+
 
     // todo 관리자 기능 추가 예정
 
